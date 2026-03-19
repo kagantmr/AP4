@@ -1,0 +1,5 @@
+ap4
+lib/
+.DS_Store
+*.log
+*.tmp
