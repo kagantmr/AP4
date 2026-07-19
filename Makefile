@@ -1,8 +1,8 @@
 CC := gcc
-CFLAGS := -std=c11 -Wall -Wextra -Ilib/raylib/src
+CFLAGS := -std=c11 -Wall -Wextra -Isrc -Ilib/raylib/src
 LDFLAGS := -Llib/raylib/src -lraylib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
 TARGET := ap4
-SRC := src/main.c
+SRC := $(shell find src -name '*.c')
 
 .PHONY: all raylib clean
 
