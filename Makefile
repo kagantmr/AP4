@@ -1,8 +1,8 @@
-CC := gcc
-CFLAGS := -std=c11 -Wall -Wextra -Isrc -Ilib/raylib/src
+CXX := g++
+CXXFLAGS := -std=c++17 -Wall -Wextra -Isrc -Ilib/raylib/src
 LDFLAGS := -Llib/raylib/src -lraylib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
 TARGET := ap4
-SRC := $(shell find src -name '*.c')
+SRC := $(shell find src -name '*.cpp')
 
 .PHONY: all raylib clean
 
@@ -15,7 +15,7 @@ raylib:
 	fi
 
 $(TARGET): raylib $(SRC)
-	$(CC) $(CFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
 
 clean:
 	rm -f $(TARGET)

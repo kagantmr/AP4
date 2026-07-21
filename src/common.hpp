@@ -1,10 +1,9 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-typedef enum {
+enum Direction {
     LEFT,
     RIGHT
-} Direction;
-
+};
 
 #endif // COMMON_H
