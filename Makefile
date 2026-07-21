@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS := -std=c++17 -Wall -Wextra -Isrc -Ilib/raylib/src
+CXXFLAGS := -std=c++17 -Wall -Wextra -Wno-missing-field-initializers -Isrc -Ilib/raylib/src
 LDFLAGS := -Llib/raylib/src -lraylib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
 TARGET := ap4
 SRC := $(shell find src -name '*.cpp')

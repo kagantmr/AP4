@@ -3,6 +3,7 @@
 #include <array>
 #include <raylib.h>
 #include "entities/player.hpp"
+#include "entities/projectile.hpp"
 #include "io/input.hpp"
 
 // Owns the window, render target, camera and world state, and drives the
@@ -13,6 +14,7 @@ public:
     ~Game();
 
     void run();
+    void spawn_proj(Vector2 & pos, Direction facing);
 
 private:
     void update(const InputSnapshot &input, float dt);
@@ -20,6 +22,7 @@ private:
     void track_player(float dt);
 
     Player player;
+    ProjectilePool projPool;
     Camera2D camera{};
     RenderTexture2D game_screen{};
     std::array<Rectangle, 2> platforms{{

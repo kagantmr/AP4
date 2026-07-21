@@ -1,23 +1,24 @@
 #include "entities/player.hpp"
 #include "consts.hpp"
+#include "game.hpp"
 #include <raylib.h>
 #include <cmath>
 
-Player::Player()
-    : Entity(Vector2{100, 100}, Vector2{30, 45}) {
+Player::Player(Game & gameContext)
+    : Entity(Vector2{100, 100}, Vector2{30, 45}), gameCtx(gameContext) {
     active = true;
     facing = RIGHT;
     hp = 100;
     id = AKSU;
     accel = PLAYER_ACCEL;
     decel = PLAYER_DECEL;
-    max_velocity = Vector2{PLAYER_WALK_SPEED, MAX_FALL_SPEED};
-    jump_force = PLAYER_JUMP_FORCE;
-    is_grounded = false;
-    buffer_timer = 0;
+    maxVelocity = Vector2{PLAYER_WALK_SPEED, MAX_FALL_SPEED};
+    jumpForce = PLAYER_JUMP_FORCE;
+    isGrounded = false;
+    bufferTimer = 0;
 }
 
-void Player::set_platforms(const Rectangle *data, int count) {
+void Player::setPlatforms(const Rectangle *data, int count) {
     platforms = data;
     platform_count = count;
 }
@@ -34,11 +35,10 @@ void Player::update(const InputSnapshot &input, float dt) {
     }
 
     // update position
-    position.x += velocity.x * dt;
-    position.y += velocity.y * dt;
+    position += velocity * dt;
 
-    was_grounded = is_grounded;
-    is_grounded = false;
+    wasGrounded = isGrounded;
+    isGrounded = false;
 
     if (velocity.y >= 0.0f) {
         float prev_bottom = previous_y + size.y;
@@ -54,24 +54,24 @@ void Player::update(const InputSnapshot &input, float dt) {
             bool crossed_top = (prev_bottom <= platforms[i].y) && (curr_bottom >= platforms[i].y);
 
             if (overlaps_x && crossed_top) {
-                is_grounded = true;
+                isGrounded = true;
                 velocity.y = 0.0f;
                 position.y = platforms[i].y - size.y;
                 break;
             }
         }
 
-        if (!is_grounded && position.y + size.y > GAME_SCREEN_HEIGHT) {
-            is_grounded = true;
+        if (!isGrounded && position.y + size.y > GAME_SCREEN_HEIGHT) {
+            isGrounded = true;
             velocity.y = 0.0f;
             position.y = GAME_SCREEN_HEIGHT - size.y;
         }
     }
 
-    if (is_grounded && buffer_timer > 0.0f) {
-        velocity.y = -jump_force;
-        buffer_timer = 0.0f;
-        is_grounded = false;
+    if (isGrounded && bufferTimer > 0.0f) {
+        velocity.y = -jumpForce;
+        bufferTimer = 0.0f;
+        isGrounded = false;
     }
 
     float input_x = 0.0f;
@@ -81,9 +81,9 @@ void Player::update(const InputSnapshot &input, float dt) {
     if (input_x > 0.0f) facing = RIGHT;
     if (input_x < 0.0f) facing = LEFT;
 
-    float target_vx = input_x * max_velocity.x;
-    float accel_rate = is_grounded ? accel : accel * AIR_CONTROL_FACTOR;
-    float decel_rate = is_grounded ? decel : decel * AIR_CONTROL_FACTOR;
+    float target_vx = input_x * maxVelocity.x;
+    float accel_rate = isGrounded ? accel : accel * AIR_CONTROL_FACTOR;
+    float decel_rate = isGrounded ? decel : decel * AIR_CONTROL_FACTOR;
     float move_rate = (std::fabs(target_vx) > 0.0f) ? accel_rate : decel_rate;
 
     if (velocity.x < target_vx) {
@@ -97,27 +97,48 @@ void Player::update(const InputSnapshot &input, float dt) {
     }
 
     if (input.JumpPressed) {
-        if ((is_grounded || coyote_timer > 0 || buffer_timer > 0)) {
-            velocity.y = -jump_force;
+        if ((isGrounded || coyoteTimer > 0 || bufferTimer > 0)) {
+            velocity.y = -jumpForce;
         } else {
-            buffer_timer = JUMP_BUFFER_TIME;
+            bufferTimer = JUMP_BUFFER_TIME;
         }
     }
 
-    if (input.JumpReleased && !is_grounded && velocity.y < 0) {
+    if (input.JumpReleased && !isGrounded && velocity.y < 0) {
         velocity.y *= VARIABLE_JUMP_HEIGHT;
     }
 
-    if (was_grounded && !is_grounded) {
-        coyote_timer = COYOTE_TIME;
+    if (wasGrounded && !isGrounded) {
+        coyoteTimer = COYOTE_TIME;
     }
 
-    if (!is_grounded) {
-        coyote_timer -= dt;
-        buffer_timer -= dt;
+    if (!isGrounded) {
+        coyoteTimer -= dt;
+        bufferTimer -= dt;
+    }
+
+    shootCooldown -= dt;
+    shootBufferTimer -= dt;
+
+    if (input.ShootPressed) {
+        shootBufferTimer = PLAYER_SHOOT_BUFFER;
+    }
+
+    if (shootBufferTimer > 0) {
+        TraceLog(LOG_INFO, "TEST");
+        if (shootCooldown <= 0) {
+            Vector2 pos = (facing == LEFT) ? (Vector2){position.x - 35, position.y + 22.5f} : (Vector2){position.x + 35, position.y + 22.5f};
+            gameCtx.spawn_proj(pos, facing);
+            shootCooldown = PLAYER_SHOOT_COOLDOWN_MAX;
+            shootBufferTimer = 0;
+        }
     }
 }
 
 void Player::draw() const {
+    char health[4];
+    snprintf(health, sizeof(health), "%d", hp);
+    health[3] = '\0';
+    DrawText(health, position.x, position.y - 30, 20, WHITE);
     DrawRectangleRec(bounds(), PURPLE);
 }

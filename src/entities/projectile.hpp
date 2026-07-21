@@ -25,4 +25,5 @@ public:
     void spawn(Vector2 spawn_pos, Direction facing, float damage);
     void update(const InputSnapshot &input, float dt);
     void draw() const;
+    int getActiveCount() const;
 };

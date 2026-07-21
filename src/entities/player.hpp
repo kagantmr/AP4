@@ -12,6 +12,8 @@ enum CharType {
     YESIM
 };
 
+class Game; // fwd declare
+
 class Player : public Entity {
 public:
     int hp{100};
@@ -19,18 +21,20 @@ public:
     CharType id{AKSU};
     float accel{0};
     float decel{0};
-    Vector2 max_velocity{0, 0};
-    bool is_grounded{false};
-    bool was_grounded{false};
-    float jump_force{0};
-    float coyote_timer{0};
-    float buffer_timer{0};
+    Vector2 maxVelocity{0, 0};
+    bool isGrounded{false};
+    bool wasGrounded{false};
+    float jumpForce{0};
+    float coyoteTimer{0};
+    float bufferTimer{0};
+    float shootCooldown{0};
+    float shootBufferTimer{0};
 
-    Player();
+    Player(Game & gameContext);
 
     // Points the player at the world geometry it should collide against. The
     // caller retains ownership; the data must outlive the player.
-    void set_platforms(const Rectangle *data, int count);
+    void setPlatforms(const Rectangle *data, int count);
 
     // Advances physics, resolves platform collisions and applies input.
     void update(const InputSnapshot &input, float dt) override;
@@ -39,5 +43,6 @@ public:
 
 private:
     const Rectangle *platforms{nullptr};
+    Game& gameCtx;
     int platform_count{0};
 };
