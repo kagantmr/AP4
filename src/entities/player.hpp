@@ -1,9 +1,9 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#pragma once
 
 #include <raylib.h>
 #include "entities/entity.hpp"
 #include "common.hpp"
+#include "io/input.hpp"
 
 enum CharType {
     AKSU,
@@ -28,10 +28,16 @@ public:
 
     Player();
 
-    // Advances physics, resolves platform collisions and handles input.
-    void update(float dt, const Rectangle *platforms, int platform_count);
+    // Points the player at the world geometry it should collide against. The
+    // caller retains ownership; the data must outlive the player.
+    void set_platforms(const Rectangle *data, int count);
+
+    // Advances physics, resolves platform collisions and applies input.
+    void update(const InputSnapshot &input, float dt) override;
 
     void draw() const;
-};
 
-#endif // PLAYER_H
+private:
+    const Rectangle *platforms{nullptr};
+    int platform_count{0};
+};

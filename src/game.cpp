@@ -5,7 +5,9 @@
 Game::Game() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "AP4");
     game_screen = LoadRenderTexture(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT);
-    SetTargetFPS(60);
+    SetTargetFPS(120);
+
+    player.set_platforms(platforms.data(), static_cast<int>(platforms.size()));
 
     camera.target = player.position;
     camera.offset = Vector2{GAME_SCREEN_WIDTH / 2.0f, GAME_SCREEN_HEIGHT / 2.0f};
@@ -22,8 +24,8 @@ void Game::track_player(float dt) {
     camera.target = Vector2Lerp(camera.target, player.position, 6.0f * dt);
 }
 
-void Game::update(float dt) {
-    player.update(dt, platforms.data(), static_cast<int>(platforms.size()));
+void Game::update(const InputSnapshot &input, float dt) {
+    player.update(input, dt);
     track_player(dt);
 }
 
@@ -31,7 +33,9 @@ void Game::render() {
     BeginTextureMode(game_screen);
     BeginMode2D(camera);
     ClearBackground(BLACK);
-    DrawText("AP4 Prototype", 20, 20, 30, WHITE);
+    char str[50];
+    sprintf(str, "AP4 prototype, fps: %d", GetFPS());
+    DrawText(str, 20, 20, 30, WHITE);
     DrawRectangle(0, GAME_SCREEN_HEIGHT, GAME_SCREEN_WIDTH, 100, BLUE);
     for (const Rectangle &platform : platforms) {
         DrawRectangleRec(platform, GRAY);
@@ -54,7 +58,8 @@ void Game::render() {
 void Game::run() {
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
-        update(dt);
+        InputSnapshot input = poll_input();
+        update(input, dt);
         render();
     }
 }

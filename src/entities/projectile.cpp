@@ -2,7 +2,8 @@
 #include "common.hpp"
 #include "consts.hpp"
 
-void Projectile::update(float dt) {
+void Projectile::update(const InputSnapshot &input, float dt) {
+    (void)input;
     (void)dt;
     if (!active) return;
     position.x += velocity.x;
@@ -24,9 +25,9 @@ void ProjectilePool::spawn(Vector2 spawn_pos, Direction facing, float damage) {
     }
 }
 
-void ProjectilePool::update(float dt) {
+void ProjectilePool::update(const InputSnapshot &input, float dt) {
     for (Projectile &proj : projectiles) {
-        proj.update(dt);
+        proj.update(input, dt);
     }
 }
 

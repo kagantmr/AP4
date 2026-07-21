@@ -1,7 +1,7 @@
-#ifndef ENTITY_GENERIC_H
-#define ENTITY_GENERIC_H
+#pragma once
 
 #include <raylib.h>
+#include "io/input.hpp"
 
 // Base class for every in-game object. Holds the common spatial state and
 // exposes a virtual update so derived entities can define their own behaviour.
@@ -17,11 +17,9 @@ public:
         : position(position), size(size) {}
     virtual ~Entity() = default;
 
-    virtual void update(float dt) { (void)dt; }
+    virtual void update(const InputSnapshot& input, float dt) = 0;
 
     Rectangle bounds() const {
         return Rectangle{position.x, position.y, size.x, size.y};
     }
 };
-
-#endif // ENTITY_GENERIC_H

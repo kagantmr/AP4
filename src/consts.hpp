@@ -1,5 +1,4 @@
-#ifndef CONSTS_H
-#define CONSTS_H
+#pragma once
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
@@ -26,5 +25,3 @@
 
 #define MAX_PROJS 64
 #define PROJ_SPEED 2000
-
-#endif // CONSTS_H

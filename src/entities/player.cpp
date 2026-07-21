@@ -4,7 +4,7 @@
 #include <cmath>
 
 Player::Player()
-    : Entity(Vector2{100, 100}, Vector2{30, 30}) {
+    : Entity(Vector2{100, 100}, Vector2{30, 45}) {
     active = true;
     facing = RIGHT;
     hp = 100;
@@ -17,7 +17,12 @@ Player::Player()
     buffer_timer = 0;
 }
 
-void Player::update(float dt, const Rectangle *platforms, int platform_count) {
+void Player::set_platforms(const Rectangle *data, int count) {
+    platforms = data;
+    platform_count = count;
+}
+
+void Player::update(const InputSnapshot &input, float dt) {
     float previous_y = position.y;
 
     // add gravity
@@ -70,8 +75,8 @@ void Player::update(float dt, const Rectangle *platforms, int platform_count) {
     }
 
     float input_x = 0.0f;
-    if (IsKeyDown(KEY_RIGHT)) input_x += 1.0f;
-    if (IsKeyDown(KEY_LEFT)) input_x -= 1.0f;
+    if (input.MoveRight) input_x += 1.0f;
+    if (input.MoveLeft) input_x -= 1.0f;
 
     if (input_x > 0.0f) facing = RIGHT;
     if (input_x < 0.0f) facing = LEFT;
@@ -91,7 +96,7 @@ void Player::update(float dt, const Rectangle *platforms, int platform_count) {
         velocity.x = 0.0f;
     }
 
-    if (IsKeyPressed(KEY_Z)) {
+    if (input.JumpPressed) {
         if ((is_grounded || coyote_timer > 0 || buffer_timer > 0)) {
             velocity.y = -jump_force;
         } else {
@@ -99,7 +104,7 @@ void Player::update(float dt, const Rectangle *platforms, int platform_count) {
         }
     }
 
-    if (IsKeyReleased(KEY_Z) && !is_grounded && velocity.y < 0) {
+    if (input.JumpReleased && !is_grounded && velocity.y < 0) {
         velocity.y *= VARIABLE_JUMP_HEIGHT;
     }
 

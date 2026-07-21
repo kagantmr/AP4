@@ -1,9 +1,9 @@
-#ifndef GAME_HPP
-#define GAME_HPP
+#pragma once
 
 #include <array>
 #include <raylib.h>
 #include "entities/player.hpp"
+#include "io/input.hpp"
 
 // Owns the window, render target, camera and world state, and drives the
 // simulate/render loop.
@@ -15,7 +15,7 @@ public:
     void run();
 
 private:
-    void update(float dt);
+    void update(const InputSnapshot &input, float dt);
     void render();
     void track_player(float dt);
 
@@ -27,5 +27,3 @@ private:
         Rectangle{340.0f, 220.0f, 160.0f, 16.0f}
     }};
 };
-
-#endif // GAME_HPP
