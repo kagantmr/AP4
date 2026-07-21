@@ -18,11 +18,6 @@ Player::Player(Game & gameContext)
     bufferTimer = 0;
 }
 
-void Player::setPlatforms(const Rectangle *data, int count) {
-    platforms = data;
-    platform_count = count;
-}
-
 void Player::update(const InputSnapshot &input, float dt) {
     float previous_y = position.y;
 
@@ -46,17 +41,17 @@ void Player::update(const InputSnapshot &input, float dt) {
         float player_left = position.x;
         float player_right = position.x + size.x;
 
-        for (int i = 0; i < platform_count; i++) {
-            float plat_left = platforms[i].x;
-            float plat_right = platforms[i].x + platforms[i].width;
+        for (int i = 0; i < gameCtx.getPlatforms().size(); i++) {
+            float plat_left = gameCtx.getPlatforms()[i].x;
+            float plat_right = gameCtx.getPlatforms()[i].x + gameCtx.getPlatforms()[i].width;
 
             bool overlaps_x = (player_right > plat_left) && (player_left < plat_right);
-            bool crossed_top = (prev_bottom <= platforms[i].y) && (curr_bottom >= platforms[i].y);
+            bool crossed_top = (prev_bottom <= gameCtx.getPlatforms()[i].y) && (curr_bottom >= gameCtx.getPlatforms()[i].y);
 
             if (overlaps_x && crossed_top) {
                 isGrounded = true;
                 velocity.y = 0.0f;
-                position.y = platforms[i].y - size.y;
+                position.y = gameCtx.getPlatforms()[i].y - size.y;
                 break;
             }
         }
@@ -125,7 +120,6 @@ void Player::update(const InputSnapshot &input, float dt) {
     }
 
     if (shootBufferTimer > 0) {
-        TraceLog(LOG_INFO, "TEST");
         if (shootCooldown <= 0) {
             Vector2 pos = (facing == LEFT) ? (Vector2){position.x - 35, position.y + 22.5f} : (Vector2){position.x + 35, position.y + 22.5f};
             gameCtx.spawn_proj(pos, facing);

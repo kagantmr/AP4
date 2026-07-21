@@ -11,6 +11,8 @@ enum EnemyType {
     GOOP
 };
 
+class Game;
+
 class Enemy : public Entity {
 public:
     float hp{0};
@@ -20,10 +22,12 @@ public:
     float behavior_timer{0};
     Direction facing{RIGHT};
 
-    Enemy(Vector2 pos, Vector2 sz, float max_hp) 
-        : Entity(pos, sz), max_hp(max_hp), hp(max_hp) {}
+    Enemy(Vector2 pos, Vector2 sz, float max_hp, Game & ctx) 
+        : Entity(pos, sz), max_hp(max_hp), hp(max_hp), gameCtx(ctx) {}
 
     // Enemies run on their own AI and ignore the player's input snapshot.
     virtual void update(const InputSnapshot& input, float dt) = 0;
     virtual void take_damage(float amount) = 0;
+protected:
+    Game &gameCtx;
 };

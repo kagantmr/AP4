@@ -2,13 +2,10 @@
 #include "consts.hpp"
 #include <raymath.h>
 
-Game::Game() : player(*this) {
+Game::Game() : player(*this), blob({100, 100}, *this) {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "AP4");
     game_screen = LoadRenderTexture(GAME_SCREEN_WIDTH, GAME_SCREEN_HEIGHT);
     SetTargetFPS(120);
-
-
-    player.setPlatforms(platforms.data(), static_cast<int>(platforms.size()));
 
     camera.target = player.position;
     camera.offset = Vector2{GAME_SCREEN_WIDTH / 2.0f, GAME_SCREEN_HEIGHT / 2.0f};
@@ -22,17 +19,33 @@ Game::~Game() {
 }
 
 void Game::spawn_proj(Vector2 & pos, Direction facing) {
-    projPool.spawn(pos, facing, 100);
+    projPool.spawn(pos, facing, 10);
 }
 
 void Game::track_player(float dt) {
     camera.target = Vector2Lerp(camera.target, player.position, 6.0f * dt);
 }
 
+
+
 void Game::update(const InputSnapshot &input, float dt) {
     projPool.update(input, dt);
     player.update(input, dt);
+    blob.update(input, dt);
     track_player(dt);
+    // Inside ProjectilePool::update or Game::update
+    Rectangle blob_rect = { blob.position.x, blob.position.y, blob.size.x, blob.size.y };
+
+    for (auto& proj : projPool.projectiles) {
+        if (!proj.active) continue;
+
+        Rectangle proj_rect = { proj.position.x, proj.position.y, proj.size.x, proj.size.y };
+        if (CheckCollisionRecs(proj_rect, blob_rect) && blob.active) {
+            blob.take_damage(proj.damage);
+            proj.active = false; // Destroy the projectile on impact
+            break;
+        }
+    }
 }
 
 void Game::render() {
@@ -40,7 +53,7 @@ void Game::render() {
     BeginMode2D(camera);
     ClearBackground(BLACK);
     char str[60];
-    snprintf(str, sizeof(str), "AP4 prototype, fps: %d, projpool: %d/%d", GetFPS(), projPool.getActiveCount(), projPool.projectiles.max_size());
+    snprintf(str, sizeof(str), "AP4 prototype, fps: %d, projpool: %d/%zu", GetFPS(), projPool.getActiveCount(), projPool.projectiles.max_size());
     DrawText(str, 20, 20, 30, WHITE);
     DrawRectangle(0, GAME_SCREEN_HEIGHT, GAME_SCREEN_WIDTH, 100, BLUE);
     for (const Rectangle &platform : platforms) {
@@ -48,6 +61,7 @@ void Game::render() {
     }
     player.draw();
     projPool.draw();
+    blob.draw();
     EndMode2D();
     EndTextureMode();
 

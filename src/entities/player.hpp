@@ -42,7 +42,5 @@ public:
     void draw() const;
 
 private:
-    const Rectangle *platforms{nullptr};
     Game& gameCtx;
-    int platform_count{0};
 };
